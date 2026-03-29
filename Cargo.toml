@@ -1,0 +1,18 @@
+[package]
+name = "servo-embedding-template-demos"
+version = "0.0.1"
+edition = "2024"
+publish = false
+
+[dependencies]
+sdl2 = { version = "0.36.0", features = ["bundled", "static-link"] }
+headers = "0.4"
+http = "1"
+servo = { git = "https://github.com/Macleodsolutions/servo-embedding-template", branch = "integration-template", default-features = false, features = ["background_hang_monitor", "gamepad", "js_jit"] }
+euclid = "0.22"
+url = "2.5"
+dpi = "0.1"
+keyboard-types = "0.8"
+
+[target.'cfg(target_os = "windows")'.dependencies]
+servo = { git = "https://github.com/Macleodsolutions/servo-embedding-template", branch = "integration-template", default-features = false, features = ["background_hang_monitor", "gamepad", "no-wgl", "js_jit"] }
