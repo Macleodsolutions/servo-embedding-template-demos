@@ -8,9 +8,20 @@ on:
 
 jobs:
   build:
-    runs-on: self-hosted
+    strategy:
+      matrix:
+        include:
+          - name: macos
+            runs_on: [self-hosted, macOS]
+            binary_suffix: ""
+          - name: windows-x64
+            runs_on: [self-hosted, windows, x64]
+            binary_suffix: ".exe"
+
+    name: Build ${{ matrix.name }}
+    runs-on: ${{ matrix.runs_on }}
     env:
-      CARGO_TARGET_DIR: D:\t
+      CARGO_TARGET_DIR: ${{ github.workspace }}/target
     defaults:
       run:
         shell: pwsh
@@ -54,5 +65,5 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: servo-embedding-template-demos
-          path: D:\t\release\servo-embedding-template-demos.exe
+          name: servo-embedding-template-demos-${{ matrix.name }}
+          path: ${{ env.CARGO_TARGET_DIR }}/release/servo-embedding-template-demos${{ matrix.binary_suffix }}
