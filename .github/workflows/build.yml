@@ -9,6 +9,9 @@ on:
 jobs:
   build:
     runs-on: self-hosted
+    defaults:
+      run:
+        shell: pwsh
 
     steps:
       - uses: actions/checkout@v4
@@ -28,7 +31,6 @@ jobs:
             ${{ runner.os }}-cargo-
 
       - name: Set up Node via fnm
-        shell: pwsh
         run: |
           fnm use --install-if-missing 22
           $env:PATH = "$env:FNM_MULTISHELL_PATH;$env:PATH"
