@@ -14,9 +14,11 @@ jobs:
           - name: macos
             runs_on: [self-hosted, macOS]
             binary_suffix: ""
+            shell: bash
           - name: windows-x64
             runs_on: [self-hosted, windows, x64]
             binary_suffix: ".exe"
+            shell: pwsh
 
     name: Build ${{ matrix.name }}
     runs-on: ${{ matrix.runs_on }}
@@ -24,7 +26,7 @@ jobs:
       CARGO_TARGET_DIR: ${{ github.workspace }}/target
     defaults:
       run:
-        shell: pwsh
+        shell: ${{ matrix.shell }}
 
     steps:
       - uses: actions/checkout@v4
@@ -32,7 +34,6 @@ jobs:
           path: s
 
       - name: Install Rust toolchain
-        shell: pwsh
         run: |
           rustup toolchain install stable --profile minimal --no-self-update
           rustup default stable
@@ -49,17 +50,14 @@ jobs:
             ${{ runner.os }}-cargo-
 
       - name: Enable corepack
-        shell: pwsh
         run: corepack enable
 
       - name: Install UI dependencies
         working-directory: s/ui
-        shell: pwsh
         run: corepack yarn install --frozen-lockfile
 
       - name: Build
         working-directory: s
-        shell: pwsh
         run: cargo build --release
 
       - name: Upload artifact
