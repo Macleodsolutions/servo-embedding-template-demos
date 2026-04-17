@@ -49,9 +49,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-cargo-
 
-      - name: Enable corepack
-        run: corepack enable
-
       - name: Install UI dependencies
         working-directory: s/ui
         run: corepack yarn install --frozen-lockfile
