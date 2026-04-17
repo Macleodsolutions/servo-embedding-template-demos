@@ -1,5 +1,6 @@
 use std::rc::Rc;
 use std::cell::Cell;
+use std::sync::OnceLock;
 
 use dpi::PhysicalSize;
 use servo::{
@@ -18,16 +19,25 @@ use servo::protocol_handler::{
 };
 use headers::HeaderValue;
 
-struct ResourceReader {
-    resources_dir: std::path::PathBuf,
-}
+struct ResourceReader;
+
+static RESOURCE_DIR: OnceLock<std::path::PathBuf> = OnceLock::new();
+static RESOURCE_READER: ResourceReader = ResourceReader;
+
+servo::submit_resource_reader!(&RESOURCE_READER);
 
 impl servo::resources::ResourceReaderMethods for ResourceReader {
     fn read(&self, res: servo::resources::Resource) -> Vec<u8> {
-        std::fs::read(self.resources_dir.join(res.filename())).unwrap_or_default()
+        let resources_dir = RESOURCE_DIR
+            .get()
+            .expect("Resource directory not initialized");
+        std::fs::read(resources_dir.join(res.filename())).unwrap_or_default()
     }
     fn sandbox_access_files_dirs(&self) -> Vec<std::path::PathBuf> {
-        vec![self.resources_dir.clone()]
+        RESOURCE_DIR
+            .get()
+            .map(|path| vec![path.clone()])
+            .unwrap_or_default()
     }
     fn sandbox_access_files(&self) -> Vec<std::path::PathBuf> {
         vec![]
@@ -98,12 +108,12 @@ impl ProtocolHandler for AppProtocolHandler {
 
 pub fn main() {
     let dev_mode = std::env::args().any(|a| a == "--dev");
-
-    servo::resources::set(Box::new(ResourceReader {
-        resources_dir: std::path::PathBuf::from(
-            std::env::var("SERVO_RESOURCE_PATH").unwrap_or_else(|_| "resources".to_string()),
-        ),
-    }));
+    let resources_dir = std::path::PathBuf::from(
+        std::env::var("SERVO_RESOURCE_PATH").unwrap_or_else(|_| "resources".to_string()),
+    );
+    RESOURCE_DIR
+        .set(resources_dir)
+        .expect("Resource directory already initialized");
 
     let sdl_context = sdl2::init().unwrap();
     let video_subsystem = sdl_context.video().unwrap();
