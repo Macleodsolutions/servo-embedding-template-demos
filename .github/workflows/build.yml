@@ -33,21 +33,14 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-cargo-
 
-      - name: Set up Node via fnm
+      - name: Enable corepack
         shell: pwsh
-        run: |
-          fnm use --install-if-missing 22
-          $env:PATH = "$env:FNM_MULTISHELL_PATH;$env:PATH"
-          echo "PATH=$env:PATH" >> $env:GITHUB_ENV
-
-      - name: Install yarn
-        shell: pwsh
-        run: npm install -g yarn
+        run: corepack enable
 
       - name: Install UI dependencies
         working-directory: ui
         shell: pwsh
-        run: yarn install --frozen-lockfile
+        run: corepack yarn install --frozen-lockfile
 
       - name: Build
         shell: pwsh
