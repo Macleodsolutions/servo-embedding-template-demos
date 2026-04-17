@@ -5,7 +5,7 @@ edition = "2024"
 publish = false
 
 [dependencies]
-sdl2 = { version = "0.36.0", features = ["bundled", "static-link"] }
+sdl2 = { version = "0.38.0", features = ["bundled", "static-link"] }
 headers = "0.4"
 http = "1"
 servo = { git = "https://github.com/Macleodsolutions/servo-embedding-template", branch = "integration-template", default-features = false, features = ["background_hang_monitor", "gamepad", "js_jit"] }
