@@ -9,12 +9,16 @@ on:
 jobs:
   build:
     runs-on: self-hosted
+    env:
+      CARGO_TARGET_DIR: D:\t
     defaults:
       run:
         shell: pwsh
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          path: s
 
       - name: Install Rust toolchain
         shell: pwsh
@@ -28,7 +32,7 @@ jobs:
           path: |
             ~/.cargo/registry
             ~/.cargo/git
-            target
+            ${{ env.CARGO_TARGET_DIR }}
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
             ${{ runner.os }}-cargo-
@@ -38,11 +42,12 @@ jobs:
         run: corepack enable
 
       - name: Install UI dependencies
-        working-directory: ui
+        working-directory: s/ui
         shell: pwsh
         run: corepack yarn install --frozen-lockfile
 
       - name: Build
+        working-directory: s
         shell: pwsh
         run: cargo build --release
 
@@ -50,4 +55,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: servo-embedding-template-demos
-          path: target/release/servo-embedding-template-demos.exe
+          path: D:\t\release\servo-embedding-template-demos.exe
