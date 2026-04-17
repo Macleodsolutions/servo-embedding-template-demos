@@ -1,3 +1,4 @@
 [env]
 SERVO_BRIDGE_WEBIDL = { value = "bridge.webidl", relative = true }
 RUSTC_BOOTSTRAP = "mozjs,mozjs_sys"
+CMAKE_POLICY_VERSION_MINIMUM = "3.5"
