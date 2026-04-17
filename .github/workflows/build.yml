@@ -8,16 +8,37 @@ on:
 
 jobs:
   build:
-    runs-on: self-hosted
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: MacOS ARM64
+            runs_on: [self-hosted, macOS]
+            binary_suffix: ""
+            shell: bash
+            cargo_target_dir: target
+            artifact_path: s/target/release/servo-embedding-template-demos
+          - name: Windows x64
+            runs_on: [self-hosted, windows, x64]
+            binary_suffix: ".exe"
+            shell: pwsh
+            cargo_target_dir: C:\t
+            artifact_path: C:\t\release\servo-embedding-template-demos.exe
+
+    name: Build ${{ matrix.name }}
+    runs-on: ${{ matrix.runs_on }}
+    env:
+      CARGO_TARGET_DIR: ${{ matrix.cargo_target_dir }}
     defaults:
       run:
-        shell: pwsh
+        shell: ${{ matrix.shell }}
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          path: s
 
       - name: Install Rust toolchain
-        shell: pwsh
         run: |
           rustup toolchain install stable --profile minimal --no-self-update
           rustup default stable
@@ -28,33 +49,25 @@ jobs:
           path: |
             ~/.cargo/registry
             ~/.cargo/git
-            target
+            ${{ env.CARGO_TARGET_DIR }}
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
             ${{ runner.os }}-cargo-
 
-      - name: Set up Node via fnm
-        shell: pwsh
-        run: |
-          fnm use --install-if-missing 22
-          $env:PATH = "$env:FNM_MULTISHELL_PATH;$env:PATH"
-          echo "PATH=$env:PATH" >> $env:GITHUB_ENV
-
-      - name: Install yarn
-        shell: pwsh
-        run: npm install -g yarn
-
       - name: Install UI dependencies
-        working-directory: ui
-        shell: pwsh
-        run: yarn install --frozen-lockfile
+        working-directory: s/ui
+        run: corepack yarn install --frozen-lockfile
+
+      - name: Ensure Windows target dir exists
+        if: runner.os == 'Windows'
+        run: New-Item -ItemType Directory -Force -Path $env:CARGO_TARGET_DIR | Out-Null
 
       - name: Build
-        shell: pwsh
+        working-directory: s
         run: cargo build --release
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: servo-embedding-template-demos
-          path: target/release/servo-embedding-template-demos.exe
+          name: servo-embedding-template-demos-${{ matrix.name }}
+          path: ${{ matrix.artifact_path }}
