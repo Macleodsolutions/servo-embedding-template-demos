@@ -18,6 +18,12 @@ jobs:
             shell: bash
             cargo_target_dir: target
             artifact_path: s/target/release/servo-embedding-template-demos
+          - name: Ubuntu x64
+            runs_on: [self-hosted, Linux, X64]
+            binary_suffix: ""
+            shell: bash
+            cargo_target_dir: target
+            artifact_path: s/target/release/servo-embedding-template-demos
           - name: Windows x64
             runs_on: [self-hosted, windows, x64]
             binary_suffix: ".exe"
