@@ -44,10 +44,80 @@ jobs:
         with:
           path: s
 
-      - name: Install Rust toolchain
+      - name: Install Rust toolchain on Linux
+        if: runner.os == 'Linux'
         run: |
+          if ! command -v rustup >/dev/null 2>&1; then
+            curl https://sh.rustup.rs -sSf | sh -s -- -y --profile minimal --default-toolchain stable
+            export PATH="$HOME/.cargo/bin:$PATH"
+          fi
           rustup toolchain install stable --profile minimal --no-self-update
           rustup default stable
+
+      - name: Install Rust toolchain on macOS
+        if: runner.os == 'macOS'
+        run: |
+          if ! command -v rustup >/dev/null 2>&1; then
+            curl https://sh.rustup.rs -sSf | sh -s -- -y --profile minimal --default-toolchain stable
+            export PATH="$HOME/.cargo/bin:$PATH"
+          fi
+          rustup toolchain install stable --profile minimal --no-self-update
+          rustup default stable
+
+      - name: Install Rust toolchain on Windows
+        if: runner.os == 'Windows'
+        run: |
+          if (-not (Get-Command rustup -ErrorAction SilentlyContinue)) {
+            Invoke-WebRequest -Uri https://win.rustup.rs/x86_64 -OutFile rustup-init.exe
+            .\rustup-init.exe -y --profile minimal --default-toolchain stable
+            "$env:USERPROFILE\.cargo\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+            $env:PATH = "$env:USERPROFILE\.cargo\bin;$env:PATH"
+          }
+          rustup toolchain install stable --profile minimal --no-self-update
+          rustup default stable
+
+      - name: Install Node.js on Linux
+        if: runner.os == 'Linux'
+        run: |
+          if ! command -v node >/dev/null 2>&1; then
+            curl -fsSL https://nodejs.org/dist/latest-v22.x/node-v22.15.0-linux-x64.tar.xz -o node.tar.xz
+            mkdir -p "$HOME/.local/node"
+            tar -xJf node.tar.xz -C "$HOME/.local/node" --strip-components=1
+            echo "$HOME/.local/node/bin" >> "$GITHUB_PATH"
+            export PATH="$HOME/.local/node/bin:$PATH"
+          fi
+          node --version
+          corepack --version
+
+      - name: Install Node.js on macOS
+        if: runner.os == 'macOS'
+        run: |
+          if ! command -v node >/dev/null 2>&1; then
+            curl -fsSL https://nodejs.org/dist/latest-v22.x/node-v22.15.0-darwin-arm64.tar.gz -o node.tar.gz
+            mkdir -p "$HOME/.local/node"
+            tar -xzf node.tar.gz -C "$HOME/.local/node" --strip-components=1
+            echo "$HOME/.local/node/bin" >> "$GITHUB_PATH"
+            export PATH="$HOME/.local/node/bin:$PATH"
+          fi
+          node --version
+          corepack --version
+
+      - name: Install Node.js on Windows
+        if: runner.os == 'Windows'
+        run: |
+          if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+            Invoke-WebRequest -Uri https://nodejs.org/dist/latest-v22.x/node-v22.15.0-win-x64.zip -OutFile node.zip
+            Expand-Archive -Path node.zip -DestinationPath $env:RUNNER_TEMP -Force
+            $nodeDir = Get-ChildItem -Directory $env:RUNNER_TEMP | Where-Object { $_.Name -like 'node-v22.15.0-win-x64' } | Select-Object -First 1
+            if (-not $nodeDir) {
+              throw 'Node.js extraction failed.'
+            }
+            $nodeBin = $nodeDir.FullName
+            $nodeBin | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+            $env:PATH = "$nodeBin;$env:PATH"
+          }
+          node --version
+          corepack --version
 
       - name: Cache Rust build artifacts
         uses: actions/cache@v4
