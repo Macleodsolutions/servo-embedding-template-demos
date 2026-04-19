@@ -1,0 +1,1 @@
+[![Build](https://github.com/Macleodsolutions/servo-embedding-template-demos/actions/workflows/build.yml/badge.svg)](https://github.com/Macleodsolutions/servo-embedding-template-demos/actions/workflows/build.yml)
