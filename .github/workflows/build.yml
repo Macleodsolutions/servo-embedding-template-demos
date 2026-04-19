@@ -12,8 +12,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - name: MacOS ARM64
-            runs_on: [self-hosted, macOS]
+          - name: MacOS arm64
+            runs_on: macos-15
             binary_suffix: ""
             shell: bash
             cargo_target_dir: target
@@ -25,7 +25,7 @@ jobs:
             cargo_target_dir: target
             artifact_path: s/target/release/servo-embedding-template-demos
           - name: Windows x64
-            runs_on: [self-hosted, windows, x64]
+            runs_on: windows-latest
             binary_suffix: ".exe"
             shell: pwsh
             cargo_target_dir: C:\t
