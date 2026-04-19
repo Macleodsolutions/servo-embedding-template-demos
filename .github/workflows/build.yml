@@ -116,7 +116,6 @@ jobs:
         with:
           path: |
             ~/.cargo/registry
-            ~/.cargo/git
             ${{ env.CARGO_TARGET_DIR }}
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
@@ -129,6 +128,12 @@ jobs:
       - name: Ensure Windows target dir exists
         if: runner.os == 'Windows'
         run: New-Item -ItemType Directory -Force -Path $env:CARGO_TARGET_DIR | Out-Null
+
+      - name: Reset Linux Cargo git checkout for Servo
+        if: runner.os == 'Linux'
+        run: |
+          rm -rf "$HOME/.cargo/git/checkouts/servo-embedding-template-"*
+          rm -rf "$HOME/.cargo/git/db/servo-embedding-template-"*
 
       - name: Build
         working-directory: s
