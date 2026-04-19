@@ -88,6 +88,12 @@ jobs:
           node --version
           corepack --version
 
+      - name: Install Yarn CLI
+        run: npm install -g yarn@1.22.22
+
+      - name: Verify Yarn
+        run: yarn --version
+
       - name: Install Linux build tools
         if: runner.os == 'Linux'
         run: |
