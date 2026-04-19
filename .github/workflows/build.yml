@@ -19,7 +19,7 @@ jobs:
             cargo_target_dir: target
             artifact_path: s/target/release/servo-embedding-template-demos
           - name: Ubuntu x64
-            runs_on: [self-hosted, Linux, X64]
+            runs_on: ubuntu-latest
             binary_suffix: ""
             shell: bash
             cargo_target_dir: target
